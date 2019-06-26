@@ -1,6 +1,5 @@
 import { Module, OnModuleInit } from "@nestjs/common";
 import { FactoryProvider } from "./factory.provider";
-import { ModuleOptions } from "./types";
 
 @Module({ providers: [FactoryProvider] })
 export class FactoryModule implements OnModuleInit {
