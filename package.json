@@ -1,6 +1,6 @@
 {
   "name": "typeorm-factories",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Factories for your TypeORM Entities",
   "main": "index.js",
   "scripts": {
