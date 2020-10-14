@@ -1,4 +1,6 @@
 # TypeORM Entity factory
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fowl1n%2Ftypeorm-factories.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fowl1n%2Ftypeorm-factories?ref=badge_shield)
+
 
 The library allows you to create factories for your entities. Useful when unit-testing your [NestJS](https://github.com/nestjs/nest) project.
 
@@ -116,3 +118,7 @@ Library has peer dependecy for faker and faker-types libraries, but make sure yo
 
 Detailed instructions for use in development. I have not told even half of all the possibilities of this library. If you have a question about the library’s work, you can create [Issue](https://github.com/owl1n/typeorm-factories/issues/new).
 If you have a desire to help me and make the documentation better, contact me. I have some problems with the narration and I think there are people who do it better than me.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fowl1n%2Ftypeorm-factories.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fowl1n%2Ftypeorm-factories?ref=badge_large)
