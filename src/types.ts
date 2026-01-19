@@ -4,12 +4,13 @@ import { EntityFactory } from './factory.util';
 
 /**
  * FactoryFunction is the function, which generate a new filled entity
+ * Can be synchronous or asynchronous
  */
 export type FactoryFunction<Entity, Settings> = (
   faker: Faker,
   settings?: Settings,
   sequence?: number,
-) => Entity;
+) => Entity | Promise<Entity>;
 
 /**
  * EntityProperty defines an object whose keys and values must be properties of the given Entity.
