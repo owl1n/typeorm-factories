@@ -279,21 +279,26 @@ export class EntityFactory<Entity, Settings> {
     return list;
   }
 
-  private async resolveEntity(entity: Entity): Promise<Entity> {
-    for (const attribute in entity) {
-      if (entity.hasOwnProperty(attribute)) {
-        if (isPromiseLike(entity[attribute])) {
-          entity[attribute] = await entity[attribute];
+  private async resolveEntity(
+    entity: Entity | Promise<Entity>,
+  ): Promise<Entity> {
+    // Await the entity if it's a promise
+    const resolvedEntity: Entity = await Promise.resolve(entity);
+
+    for (const attribute in resolvedEntity) {
+      if (resolvedEntity.hasOwnProperty(attribute)) {
+        if (isPromiseLike(resolvedEntity[attribute])) {
+          resolvedEntity[attribute] = await resolvedEntity[attribute];
         }
 
         if (
-          typeof entity[attribute] === 'object' &&
-          !(entity[attribute] instanceof Date)
+          typeof resolvedEntity[attribute] === 'object' &&
+          !(resolvedEntity[attribute] instanceof Date)
         ) {
-          const subEntityFactory = entity[attribute];
+          const subEntityFactory = resolvedEntity[attribute];
           try {
             if (typeof (subEntityFactory as any).make === 'function') {
-              entity[attribute] = await (subEntityFactory as any).make();
+              resolvedEntity[attribute] = await (subEntityFactory as any).make();
             }
           } catch (error) {
             const message = `Could not make ${(subEntityFactory as any).name}`;
@@ -302,6 +307,6 @@ export class EntityFactory<Entity, Settings> {
         }
       }
     }
-    return entity;
+    return resolvedEntity;
   }
 }
