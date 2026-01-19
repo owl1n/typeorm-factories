@@ -1,118 +1,338 @@
-# TypeORM Entity factory
+# TypeORM Entity Factory
 
-The library allows you to create factories for your entities. Useful when unit-testing your [NestJS](https://github.com/nestjs/nest) project.
+English | [Русский](README.ru.md)
 
-### Faker
+A library for creating TypeORM entity factories to simplify test data generation in NestJS applications.
 
-Library using [@faker-js/faker](https://github.com/faker-js/faker) to provide fake-data in your factories.
+## Why Use This
 
-Library has peer dependency for @faker-js/faker, make sure you have it installed.
+When writing unit tests, you often need to create entity instances with populated data. Instead of manually creating objects in every test, factories allow you to:
 
-### How to
+- Centrally define test data structure
+- Quickly generate realistic data using Faker
+- Override specific fields when needed
+- Create multiple instances with a single command
+- Avoid code duplication across tests
 
-1) Install library:
+## Installation
 
-    `pnpm add typeorm-factories` or `npm install typeorm-factories`
+```bash
+pnpm add -D typeorm-factories @faker-js/faker
+# or
+npm install --save-dev typeorm-factories @faker-js/faker
+```
 
-2) Library can find factory file everywhere in project folder. But could be better if you can create folder for them:
+The library uses [@faker-js/faker](https://github.com/faker-js/faker) to generate fake data.
 
-    Create folder in project root: `mkdir factories`
+## Quick Start
+
+### 1. Define a Factory
+
+Create a factory file (e.g., `factories/task.factory.ts`):
+
+```typescript
+import { faker } from '@faker-js/faker';
+import { define } from 'typeorm-factories';
+import { Task } from '../src/entities/task.entity';
+
+define(Task, (fakerInstance) => {
+  const task = new Task();
+  
+  task.id = fakerInstance.string.uuid();
+  task.title = fakerInstance.lorem.sentence();
+  task.description = fakerInstance.lorem.paragraph();
+  task.completed = fakerInstance.datatype.boolean();
+  task.createdAt = fakerInstance.date.past();
+  
+  return task;
+});
+```
+
+### 2. Use the Factory in Tests
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FactoryModule, factory } from 'typeorm-factories';
+import { TasksService } from './tasks.service';
+import { Task } from './entities/task.entity';
+
+describe('TasksService', () => {
+  let service: TasksService;
+  let repository: Repository<Task>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [FactoryModule],
+      providers: [
+        TasksService,
+        {
+          provide: getRepositoryToken(Task),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
     
-3) Create your first factory:
+    await module.init();
 
-    ```typescript
-    import { faker } from '@faker-js/faker';
-    import { define } from 'typeorm-factories';
-    import { Task } from '../src/tasks/task.entity';
-    
-    define(Task, (fakerInstance) => {
-      const task = new Task();
-    
-      task.id = fakerInstance.string.uuid();
-      task.title = fakerInstance.lorem.word();
-    
-      return task;
+    service = module.get<TasksService>(TasksService);
+    repository = module.get<Repository<Task>>(getRepositoryToken(Task));
+  });
+
+  describe('create', () => {
+    it('should create a new task', async () => {
+      const taskData = await factory(Task).make();
+      
+      jest.spyOn(repository, 'save').mockResolvedValue(taskData);
+
+      const result = await service.create(taskData);
+      
+      expect(result).toEqual(taskData);
+      expect(repository.save).toHaveBeenCalledWith(taskData);
     });
-    ```
-   
-   Here we have factory for `Task` entity. Entity has this interface:
-   
-   ```typescript
-    @Entity({ name: 'tasks' })
-    export class Task {
-      @PrimaryGeneratedColumn('uuid')
-      id: string;
-    
-      @Column()
-      title: string;
-   }
-    ```
-   
-4) Use it everywhere:
+  });
 
-    In my case i wanted to create unit-testing of my project without database hitting. Just test it on mock data. How?
-    
-    Look at my test file for my tasks controller in project:
-    
-    For first we need to create `mockFactory` for repositories. Place this code everywhere you want:
-    
-    ```typescript   
-    export type MockType<T> = {
-        [P in keyof T]: jest.Mock<{}>;
-    };
+  describe('findCompleted', () => {
+    it('should return only completed tasks', async () => {
+      const completedTasks = await factory(Task)
+        .makeMany(3, { completed: true });
+      
+      jest.spyOn(repository, 'find').mockResolvedValue(completedTasks);
 
-    // @ts-ignore
-    export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
-        findOne: jest.fn(entity => entity),
-        findOneOrFail: jest.fn(entity => entity),
-        // there u can implement another functions of your repositories
-    }));
-    ```
-   
-    And lookup to code of test file for my controller
-    
-    ```typescript
-    describe('TasksController', () => {
-        let controller: TasksController;
-        let repository: MockType<Repository<Task>>;
-        
-        beforeEach(async () => {
-            const module = await Test.createTestingModule({
-            imports: [FactoryModule],
-            controllers: [TasksController],
-            providers: [
-               TasksService,
-               { provide: getRepositoryToken(Task), useFactory: repositoryMockFactory },
-               ],
-            }).compile();
-            await module.init(); // we are need to wait for module creating, but we inject our factory module to testing module
-            
-            controller = module.get<TasksController>(TasksController);
-            repository = module.get(getRepositoryToken(Task));
-        });
-            
-        describe('getOne', () => {
-            it('should return entity', async () => {
-                const task = await factory(Task).make();
-                repository.findOneOrFail.mockReturnValue(task);
-
-                expect(await repository.findOneOrFail(task.id)).toEqual(task);
-                expect(repository.findOneOrFail).toBeCalledWith(task.id);
-            })
-        })
+      const result = await service.findCompleted();
+      
+      expect(result).toHaveLength(3);
+      expect(result.every(task => task.completed)).toBe(true);
     });
-    ```
+  });
+});
+```
 
-    As you can see, we are create entity by factory via `factory()` function.
-    After call this we have object of type `EntityFactory`.
+## API
+
+### `define(Entity, factoryFunction)`
+
+Registers a factory for an entity.
+
+**Parameters:**
+- `Entity`: TypeORM entity class
+- `factoryFunction`: Function that receives a Faker instance and optional settings, returns a populated entity
+
+```typescript
+define(User, (faker) => {
+  const user = new User();
+  user.email = faker.internet.email();
+  user.name = faker.person.fullName();
+  return user;
+});
+```
+
+### `factory(Entity, settings?)`
+
+Creates an EntityFactory instance for generating entity objects.
+
+**Parameters:**
+- `Entity`: Entity class
+- `settings` (optional): Additional settings for the factory
+
+**Returns:** `EntityFactory<Entity, Settings>`
+
+### EntityFactory API
+
+#### `make(overrideParams?)`
+
+Creates a single entity instance.
+
+```typescript
+const task = await factory(Task).make();
+
+// With field overrides
+const urgentTask = await factory(Task).make({ 
+  priority: 'high',
+  dueDate: new Date('2024-12-31')
+});
+```
+
+#### `makeMany(count, overrideParams?)`
+
+Creates an array of entity instances.
+
+```typescript
+// Create 5 tasks
+const tasks = await factory(Task).makeMany(5);
+
+// Create 3 tasks with "completed" status
+const completedTasks = await factory(Task).makeMany(3, { completed: true });
+```
+
+#### `map(callback)`
+
+Applies a function to each created object. Useful for additional processing.
+
+```typescript
+const tasksWithTimestamps = await factory(Task)
+  .map(async (task) => {
+    task.updatedAt = new Date();
+    return task;
+  })
+  .makeMany(5);
+```
+
+## Advanced Usage
+
+### Factories with Settings
+
+```typescript
+interface UserSettings {
+  role: 'admin' | 'user';
+}
+
+define(User, (faker, settings?: UserSettings) => {
+  const user = new User();
+  user.email = faker.internet.email();
+  user.name = faker.person.fullName();
+  user.role = settings?.role || 'user';
+  return user;
+});
+
+// Usage
+const admin = await factory(User, { role: 'admin' }).make();
+const regularUser = await factory(User, { role: 'user' }).make();
+```
+
+### Nested Entities
+
+Factories can automatically resolve nested entities:
+
+```typescript
+define(Comment, (faker) => {
+  const comment = new Comment();
+  comment.text = faker.lorem.paragraph();
+  comment.author = factory(User).make(); // Returns a Promise
+  return comment;
+});
+
+// Nested entity will be automatically resolved
+const comment = await factory(Comment).make();
+console.log(comment.author); // User object
+```
+
+### Related Entities
+
+```typescript
+define(Post, (faker) => {
+  const post = new Post();
+  post.title = faker.lorem.sentence();
+  post.content = faker.lorem.paragraphs();
+  return post;
+});
+
+define(Comment, (faker) => {
+  const comment = new Comment();
+  comment.text = faker.lorem.paragraph();
+  return comment;
+});
+
+// Creating a post with comments
+const post = await factory(Post).make();
+const comments = await factory(Comment).makeMany(3, { postId: post.id });
+```
+
+## Project Structure
+
+It's recommended to keep factories in a separate directory:
+
+```
+your-project/
+├── src/
+│   ├── entities/
+│   │   ├── user.entity.ts
+│   │   └── task.entity.ts
+│   └── ...
+├── factories/
+│   ├── user.factory.ts
+│   └── task.factory.ts
+└── test/
+    └── ...
+```
+
+The library automatically finds all files matching the pattern `**/*.factory.{js,ts}` when the module initializes.
+
+## How It Works
+
+1. When `FactoryModule` is imported into a test module, it scans the project for factory files
+2. All found factories are registered in a global registry
+3. The `factory()` function retrieves the registered factory by entity class
+4. `make()` and `makeMany()` methods use Faker to generate data
+5. Nested factories and promises are automatically resolved
+
+## Compatibility
+
+- TypeORM: ^0.3.0
+- NestJS: ^11.0.0
+- @faker-js/faker: ^10.0.0
+- Node.js: >=18.0.0
+
+## Complete Setup Example
+
+**factories/task.factory.ts:**
+```typescript
+import { faker } from '@faker-js/faker';
+import { define } from 'typeorm-factories';
+import { Task, TaskStatus } from '../src/entities/task.entity';
+
+define(Task, (fakerInstance) => {
+  const task = new Task();
+  
+  task.id = fakerInstance.string.uuid();
+  task.title = fakerInstance.lorem.sentence({ min: 3, max: 8 });
+  task.description = fakerInstance.lorem.paragraph();
+  task.status = fakerInstance.helpers.arrayElement([
+    TaskStatus.TODO,
+    TaskStatus.IN_PROGRESS,
+    TaskStatus.DONE
+  ]);
+  task.priority = fakerInstance.number.int({ min: 1, max: 5 });
+  task.dueDate = fakerInstance.date.future();
+  task.createdAt = fakerInstance.date.past();
+  task.updatedAt = new Date();
+  
+  return task;
+});
+```
+
+**test/tasks.service.spec.ts:**
+```typescript
+import { Test } from '@nestjs/testing';
+import { FactoryModule, factory } from 'typeorm-factories';
+import { Task } from '../src/entities/task.entity';
+
+describe('TasksService', () => {
+  beforeAll(async () => {
+    const module = await Test.createTestingModule({
+      imports: [FactoryModule],
+      // ... other providers
+    }).compile();
     
-    `EnityFactory` provide 3 functions:
-    - `map(callback)` - callback will be called for every item in array or solo item when we call `make` or `makeMany` functions.
-    - `makeMany(count, params)` - create many objects of your entity. Override default params in original object by passed params from variable.
-    - `make(params)` - create one one entity object and override. About params see above.
+    await module.init();
+  });
 
+  it('example test', async () => {
+    const task = await factory(Task).make({ priority: 5 });
+    expect(task.priority).toBe(5);
+  });
+});
+```
 
-##### Few words
+## Support
 
-Detailed instructions for use in development. I have not told even half of all the possibilities of this library. If you have a question about the library’s work, you can create [Issue](https://github.com/owl1n/typeorm-factories/issues/new).
-If you have a desire to help me and make the documentation better, contact me. I have some problems with the narration and I think there are people who do it better than me.
+If you have questions or issues, please create an [Issue](https://github.com/owl1n/typeorm-factories/issues/new) in the project repository.
+
+## License
+
+MIT
