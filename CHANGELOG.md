@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2026-01-19
+
+### Added
+- **Async Factory Functions**: Factory functions can now be asynchronous
+  - Support for `async (faker, settings, sequence) => { ... }`
+  - Seamless integration with all existing features (states, hooks, associations)
+  - Compatible with `make()`, `makeMany()`, and `build()` methods
+
+### Fixed
+- Fixed TypeScript type errors when resolving async factory functions
+- Improved type handling for `Entity | Promise<Entity>` in internal methods
+- Fixed code style issues identified by linting
+
 ## [2.0.0] - 2026-01-19
 
 ### Breaking Changes
