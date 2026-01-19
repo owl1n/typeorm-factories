@@ -185,6 +185,146 @@ const tasksWithTimestamps = await factory(Task)
 
 ## Продвинутое использование
 
+### Последовательности (Sequences)
+
+Генерация уникальных последовательных значений для каждой сущности:
+
+```typescript
+define(User, (faker, settings, sequence) => {
+  const user = new User();
+  user.email = `user${sequence}@example.com`;
+  user.username = `user_${sequence}`;
+  user.name = faker.person.fullName();
+  return user;
+});
+
+// Создает пользователей с email: user0@, user1@, user2@
+const users = await factory(User).makeMany(3);
+```
+
+### Состояния (States)
+
+Определение переиспользуемых модификаций сущностей:
+
+```typescript
+define(User, (faker) => {
+  const user = new User();
+  user.email = faker.internet.email();
+  user.role = 'user';
+  user.status = 'active';
+  return user;
+})
+  .state('admin', (user) => {
+    user.role = 'admin';
+    user.permissions = ['read', 'write', 'delete'];
+    return user;
+  })
+  .state('suspended', (user) => {
+    user.status = 'suspended';
+    user.suspendedAt = new Date();
+    return user;
+  })
+  .state('premium', async (user) => {
+    user.subscriptionTier = 'premium';
+    user.subscriptionEndsAt = faker.date.future();
+    return user;
+  });
+
+// Применение одного состояния
+const admin = await factory(User).state('admin').make();
+
+// Применение нескольких состояний
+const suspendedAdmin = await factory(User)
+  .states(['admin', 'suspended'])
+  .make();
+```
+
+### Хуки жизненного цикла (Lifecycle Hooks)
+
+Выполнение кода до или после создания сущности:
+
+```typescript
+define(User, (faker) => {
+  const user = new User();
+  user.email = faker.internet.email();
+  user.password = 'plain-password';
+  return user;
+})
+  .beforeMake(async (user) => {
+    // Хеширование пароля перед созданием
+    user.password = await bcrypt.hash(user.password, 10);
+  })
+  .afterMake(async (user) => {
+    // Логирование или дополнительная настройка
+    console.log('Пользователь создан:', user.email);
+  });
+
+const user = await factory(User).make();
+// Пароль автоматически хешируется
+```
+
+### Ассоциации (Associations)
+
+Автоматическое создание связанных сущностей:
+
+```typescript
+define(Post, (faker) => {
+  const post = new Post();
+  post.title = faker.lorem.sentence();
+  post.content = faker.lorem.paragraphs();
+  return post;
+})
+  .association('author', User)
+  .association('comments', Comment, { count: 3 });
+
+// Автоматически создает User и 3 Comment
+const post = await factory(Post).make();
+console.log(post.author); // Экземпляр User
+console.log(post.comments); // Массив из 3 экземпляров Comment
+```
+
+### Метод Build
+
+Создание сущностей без использования Faker (полезно для моков):
+
+```typescript
+const userMock = factory(User).build({
+  id: '123',
+  email: 'test@example.com',
+  name: 'Test User',
+});
+
+// Возвращает простой объект без вызова faker
+expect(userMock.email).toBe('test@example.com');
+```
+
+### Комбинирование возможностей
+
+Все возможности можно комбинировать для сложных сценариев:
+
+```typescript
+define(User, (faker, settings, sequence) => {
+  const user = new User();
+  user.email = `user${sequence}@example.com`;
+  user.name = faker.person.fullName();
+  user.role = 'user';
+  return user;
+})
+  .state('withPosts', async (user) => {
+    user.posts = await factory(Post).makeMany(5, { authorId: user.id });
+    return user;
+  })
+  .beforeMake(async (user) => {
+    user.createdAt = new Date();
+  })
+  .association('profile', UserProfile);
+
+// Создание администратора с постами и профилем
+const admin = await factory(User)
+  .state('withPosts')
+  .make({ role: 'admin' });
+```
+
 ### Фабрики с настройками
 
 ```typescript
@@ -241,6 +381,26 @@ define(Comment, (faker) => {
 // Создание поста с комментариями
 const post = await factory(Post).make();
 const comments = await factory(Comment).makeMany(3, { postId: post.id });
+```
+
+### Сброс последовательностей
+
+Сброс счетчиков последовательностей между тестами для обеспечения консистентности данных:
+
+```typescript
+import { resetSequences } from 'typeorm-factories';
+
+describe('UserService', () => {
+  beforeEach(() => {
+    resetSequences(); // Сбрасывает все счетчики последовательностей
+  });
+
+  it('создает пользователей с последовательными email', async () => {
+    const users = await factory(User).makeMany(2);
+    expect(users[0].email).toBe('user0@example.com');
+    expect(users[1].email).toBe('user1@example.com');
+  });
+});
 ```
 
 ## Структура проекта

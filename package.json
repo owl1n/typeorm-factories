@@ -1,13 +1,13 @@
 {
   "name": "typeorm-factories",
-  "version": "1.0.1",
-  "description": "Factories for your TypeORM Entities",
+  "version": "2.0.0",
+  "description": "Advanced factories for TypeORM entities with states, sequences, lifecycle hooks, and associations",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "coverage": "jest --coverage",
-    "coveralls": "pnpm run coverage --coverageReporters=text-lcov | coveralls",
-    "test:watch": "jest --watch",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "coveralls": "vitest run --coverage --reporter=lcov | coveralls",
+    "test:watch": "vitest",
     "build": "rm -rf ./dist && tsc && pnpm run build:index",
     "build:index": "rm -rf ./index.js ./index.d.ts && tsc -d --skipLibCheck ./index.ts",
     "format": "prettier **/*.ts --ignore-path ./.prettierignore --write && git status",
@@ -41,13 +41,15 @@
     "@nestjs/common": "^11.1.12",
     "@types/glob": "^9.0.0",
     "@types/node": "^25.0.9",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
     "coveralls": "^3.1.1",
     "glob": "^13.0.0",
-    "jest": "^30.2.0",
     "prettier": "^3.8.0",
+    "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "ts-jest": "^29.4.6",
     "typeorm": "^0.3.28",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.0.17"
   }
 }
