@@ -1,10 +1,10 @@
-import * as Faker from "faker";
+import { faker } from "@faker-js/faker";
 import { ObjectType, Repository } from "typeorm";
 import {
   EntityFactoryDefinition,
   EntityProperty,
   Factory,
-  FactoryFunction
+  FactoryFunction,
 } from "./types";
 
 export const entityFactories = new Map<
@@ -14,17 +14,17 @@ export const entityFactories = new Map<
 
 export const define = <Entity, Settings>(
   entity: ObjectType<Entity>,
-  factoryFn: FactoryFunction<Entity, Settings>
+  factoryFn: FactoryFunction<Entity, Settings>,
 ) => {
   entityFactories.set(getNameOfEntity(entity), {
     entity,
-    factory: factoryFn
+    factory: factoryFn,
   });
 };
 
 export const factory: Factory = <Entity, Settings>(
   entity: ObjectType<Entity>,
-  settings?: Settings
+  settings?: Settings,
 ) => {
   const name = getNameOfEntity(entity);
   const entityFactoryObject = entityFactories.get(name);
@@ -32,7 +32,7 @@ export const factory: Factory = <Entity, Settings>(
     name,
     entity,
     entityFactoryObject.factory,
-    settings
+    settings,
   );
 };
 
@@ -58,28 +58,28 @@ export class EntityFactory<Entity, Settings> {
     public name: string,
     public entity: ObjectType<Entity>,
     private factory: FactoryFunction<Entity, Settings>,
-    private settings: Settings
+    private settings: Settings,
   ) {}
 
   public map(
-    mapFunction: (entity: Entity) => Promise<Entity>
+    mapFunction: (entity: Entity) => Promise<Entity>,
   ): EntityFactory<Entity, Settings> {
     this.mapFunction = mapFunction;
     return this;
   }
 
   public async make(
-    overrideParams: EntityProperty<Entity> = {}
+    overrideParams: EntityProperty<Entity> = {},
   ): Promise<Entity> {
     if (this.factory) {
-      let entity = await this.resolveEntity(this.factory(Faker, this.settings));
+      let entity = await this.resolveEntity(this.factory(faker, this.settings));
       if (this.mapFunction) {
         entity = await this.mapFunction(entity);
       }
 
       for (const key in overrideParams) {
         if (overrideParams.hasOwnProperty(key)) {
-          entity[key] = overrideParams[key];
+          (entity as any)[key] = overrideParams[key];
         }
       }
 
@@ -90,7 +90,7 @@ export class EntityFactory<Entity, Settings> {
 
   public async makeMany(
     amount: number,
-    overrideParams: EntityProperty<Entity> = {}
+    overrideParams: EntityProperty<Entity> = {},
   ): Promise<Entity[]> {
     const list = [];
     for (let index = 0; index < amount; index++) {

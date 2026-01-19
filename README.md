@@ -2,17 +2,17 @@
 
 The library allows you to create factories for your entities. Useful when unit-testing your [NestJS](https://github.com/nestjs/nest) project.
 
-###### Faker
+### Faker
 
-Library using [faker.js](https://github.com/marak/Faker.js/) for provide fake-data in you factories.
+Library using [@faker-js/faker](https://github.com/faker-js/faker) to provide fake-data in your factories.
 
-Library has peer dependecy for faker and faker-types libraries, but make sure you have them installed. If you want take help about functions in your IDE, just install ```@types/faker and faker``` libraries for yourself.
+Library has peer dependency for @faker-js/faker, make sure you have it installed.
 
 ### How to
 
 1) Install library:
 
-    `yarn add typeorm-factories` or `npm install typeorm-factories`
+    `pnpm add typeorm-factories` or `npm install typeorm-factories`
 
 2) Library can find factory file everywhere in project folder. But could be better if you can create folder for them:
 
@@ -21,15 +21,15 @@ Library has peer dependecy for faker and faker-types libraries, but make sure yo
 3) Create your first factory:
 
     ```typescript
-    import * as Faker from 'faker';
+    import { faker } from '@faker-js/faker';
     import { define } from 'typeorm-factories';
     import { Task } from '../src/tasks/task.entity';
     
-    define(Task, (faker: typeof Faker) => {
+    define(Task, (fakerInstance) => {
       const task = new Task();
     
-      task.id = faker.random.uuid();
-      task.title = faker.lorem.word();
+      task.id = fakerInstance.string.uuid();
+      task.title = fakerInstance.lorem.word();
     
       return task;
     });
