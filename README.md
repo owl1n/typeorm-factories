@@ -185,6 +185,27 @@ const tasksWithTimestamps = await factory(Task)
 
 ## Advanced Usage
 
+### Async Factory Functions
+
+Factory functions can be asynchronous for complex data generation:
+
+```typescript
+define(User, async (faker) => {
+  const user = new User();
+  
+  // Simulate async operations (API calls, file I/O, etc.)
+  user.email = await someAsyncEmailGenerator();
+  user.avatar = await fetchRandomAvatar();
+  user.name = faker.person.fullName();
+  
+  return user;
+});
+
+// Works seamlessly with all methods
+const user = await factory(User).make();
+const users = await factory(User).makeMany(5);
+```
+
 ### Sequences
 
 Generate unique sequential values for each entity:
