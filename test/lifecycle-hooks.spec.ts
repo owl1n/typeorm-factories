@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { define, factory, resetSequences } from '../src/factory.util';
 import { User } from './entities';
@@ -132,7 +132,7 @@ describe('Lifecycle Hooks', () => {
       user.password = 'password';
       return user;
     }).beforeMake(async (user) => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       user.password = `async_${user.password}`;
     });
 

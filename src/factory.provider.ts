@@ -1,5 +1,5 @@
-import { globSync } from "glob";
-import * as path from "path";
+import { globSync } from 'glob';
+import * as path from 'path';
 
 export class FactoryProvider {
   loadFiles(filePattern: string[]): string[] {

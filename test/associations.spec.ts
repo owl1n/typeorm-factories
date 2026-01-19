@@ -57,7 +57,7 @@ describe('Associations', () => {
     expect(post.author).toBeDefined();
     expect(post.comments).toBeDefined();
     expect(post.comments).toHaveLength(3);
-    post.comments!.forEach(comment => {
+    post.comments!.forEach((comment) => {
       expect(comment).toBeInstanceOf(Comment);
       expect(comment.text).toBeDefined();
     });
@@ -160,7 +160,7 @@ describe('Associations', () => {
 
     expect(post.author).toBeInstanceOf(User);
     expect(post.comments).toHaveLength(2);
-    post.comments!.forEach(comment => {
+    post.comments!.forEach((comment) => {
       expect(comment.author).toBeInstanceOf(User);
     });
   });

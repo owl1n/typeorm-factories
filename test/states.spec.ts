@@ -73,9 +73,9 @@ describe('Factory States', () => {
       return user;
     });
 
-    await expect(
-      factory(User).state('nonexistent').make()
-    ).rejects.toThrow('State "nonexistent" is not defined');
+    await expect(factory(User).state('nonexistent').make()).rejects.toThrow(
+      'State "nonexistent" is not defined',
+    );
   });
 
   it('should allow state modifications to persist with overrides', async () => {
@@ -92,9 +92,7 @@ describe('Factory States', () => {
       return user;
     });
 
-    const user = await factory(User)
-      .state('suspended')
-      .make({ role: 'admin' });
+    const user = await factory(User).state('suspended').make({ role: 'admin' });
 
     expect(user.status).toBe('suspended');
     expect(user.role).toBe('admin');
@@ -114,9 +112,9 @@ describe('Factory States', () => {
     });
 
     const users = await factory(User).state('admin').makeMany(3);
-    
+
     expect(users).toHaveLength(3);
-    users.forEach(user => {
+    users.forEach((user) => {
       expect(user.role).toBe('admin');
     });
   });

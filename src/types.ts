@@ -1,6 +1,6 @@
-import { Faker } from "@faker-js/faker";
-import { ObjectType } from "typeorm";
-import { EntityFactory } from "./factory.util";
+import { Faker } from '@faker-js/faker';
+import { ObjectType } from 'typeorm';
+import { EntityFactory } from './factory.util';
 
 /**
  * FactoryFunction is the function, which generate a new filled entity
