@@ -18,15 +18,18 @@
     "lib": ["es2017"]
   },
   "include": [
-    "*.ts",
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "./index.ts",
     "./index.d.ts",
     "node_modules",
     "./**/*.spec.ts",
+    "test",
+    "dist",
+    "coverage",
     "examples",
-    "__tests__"
+    "__tests__",
+    "vitest.config.ts"
   ]
 }

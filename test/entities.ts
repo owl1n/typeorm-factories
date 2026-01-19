@@ -1,5 +1,11 @@
 import 'reflect-metadata';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -36,7 +42,7 @@ export class User {
   @Column({ type: 'datetime', nullable: true })
   createdAt?: Date;
 
-  @OneToMany(() => Post, post => post.author)
+  @OneToMany(() => Post, (post) => post.author)
   posts?: Post[];
 }
 
@@ -54,13 +60,13 @@ export class Post {
   @Column({ type: 'boolean', default: false })
   published: boolean;
 
-  @ManyToOne(() => User, user => user.posts)
+  @ManyToOne(() => User, (user) => user.posts)
   author?: User;
 
   @Column({ type: 'varchar', nullable: true })
   authorId?: string;
 
-  @OneToMany(() => Comment, comment => comment.post)
+  @OneToMany(() => Comment, (comment) => comment.post)
   comments?: Comment[];
 }
 
@@ -72,7 +78,7 @@ export class Comment {
   @Column('text')
   text: string;
 
-  @ManyToOne(() => Post, post => post.comments)
+  @ManyToOne(() => Post, (post) => post.comments)
   post?: Post;
 
   @Column({ type: 'varchar', nullable: true })

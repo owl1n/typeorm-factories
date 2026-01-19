@@ -1,5 +1,5 @@
-import { faker } from "@faker-js/faker";
-import { ObjectType, Repository } from "typeorm";
+import { faker } from '@faker-js/faker';
+import { ObjectType, Repository } from 'typeorm';
 import {
   AssociationDefinition,
   EntityFactoryDefinition,
@@ -8,7 +8,7 @@ import {
   FactoryFunction,
   LifecycleHook,
   StateFunction,
-} from "./types";
+} from './types';
 
 export const entityFactories = new Map<
   string,
@@ -72,13 +72,13 @@ export const getNameOfEntity = <T>(entity: ObjectType<T>): string => {
   } else if (entity) {
     return new (entity as any)().constructor.name;
   }
-  throw new Error("Entity is not defined");
+  throw new Error('Entity is not defined');
 };
 
 export const isPromiseLike = (o: any): boolean =>
   !!o &&
-  (typeof o === "object" || typeof o === "function") &&
-  typeof o.then === "function" &&
+  (typeof o === 'object' || typeof o === 'function') &&
+  typeof o.then === 'function' &&
   !(o instanceof Date);
 
 /**
@@ -192,7 +192,7 @@ export class EntityFactory<Entity, Settings> {
     overrideParams: EntityProperty<Entity> = {},
   ): Promise<Entity> {
     if (!this.factoryFunction) {
-      throw new Error("Could not found entity");
+      throw new Error('Could not found entity');
     }
 
     // Get and increment sequence
@@ -287,12 +287,12 @@ export class EntityFactory<Entity, Settings> {
         }
 
         if (
-          typeof entity[attribute] === "object" &&
+          typeof entity[attribute] === 'object' &&
           !(entity[attribute] instanceof Date)
         ) {
           const subEntityFactory = entity[attribute];
           try {
-            if (typeof (subEntityFactory as any).make === "function") {
+            if (typeof (subEntityFactory as any).make === 'function') {
               entity[attribute] = await (subEntityFactory as any).make();
             }
           } catch (error) {

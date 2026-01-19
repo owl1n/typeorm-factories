@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { define, factory, resetSequences } from '../src/factory.util';
 import { User, Post } from './entities';
@@ -47,16 +47,16 @@ describe('Integration Tests', () => {
     // Check associations
     expect(post.author).toBeDefined();
     expect(post.author).toBeInstanceOf(User);
-    
+
     // Check sequences
     expect(post.id).toBe('post-0');
     expect(post.author!.id).toBe('user-0');
     expect(post.author!.email).toBe('user0@example.com');
-    
+
     // Check hooks were executed
     expect(beforeHook).toHaveBeenCalledTimes(1);
     expect(afterHook).toHaveBeenCalledTimes(1);
-    
+
     // Check hooks effect
     expect(post.author!.password).toBe('hashed_plain');
     expect(post.author!.createdAt).toBeInstanceOf(Date);
@@ -117,7 +117,7 @@ describe('Integration Tests', () => {
     const posts = await factory(Post).makeMany(3);
 
     expect(posts).toHaveLength(3);
-    
+
     posts.forEach((post, index) => {
       expect(post.id).toBe(`post-${index}`);
       expect(post.title).toBe(`Post ${index}`);
@@ -143,20 +143,18 @@ describe('Integration Tests', () => {
         user.createdAt = new Date('2024-01-01');
       });
 
-    const user = await factory(User)
-      .state('admin')
-      .make({
-        email: 'custom@example.com',
-        name: 'Custom Name',
-      });
+    const user = await factory(User).state('admin').make({
+      email: 'custom@example.com',
+      name: 'Custom Name',
+    });
 
     // Overrides should take precedence
     expect(user.email).toBe('custom@example.com');
     expect(user.name).toBe('Custom Name');
-    
+
     // State should still be applied
     expect(user.role).toBe('admin');
-    
+
     // Hook should still execute
     expect(user.createdAt).toEqual(new Date('2024-01-01'));
   });
@@ -180,7 +178,7 @@ describe('Integration Tests', () => {
       })
       .makeMany(2);
 
-    users.forEach(user => {
+    users.forEach((user) => {
       expect(user.emailVerified).toBe(true);
       expect(user.status).toBe('premium');
     });
