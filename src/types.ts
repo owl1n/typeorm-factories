@@ -1,4 +1,4 @@
-import * as Faker from "faker";
+import { Faker } from "@faker-js/faker";
 import { ObjectType } from "typeorm";
 import { EntityFactory } from "./factory.util";
 
@@ -6,8 +6,8 @@ import { EntityFactory } from "./factory.util";
  * FactoryFunction is the function, which generate a new filled entity
  */
 export type FactoryFunction<Entity, Settings> = (
-  faker: typeof Faker,
-  settings?: Settings
+  faker: Faker,
+  settings?: Settings,
 ) => Entity;
 
 /**
@@ -22,7 +22,7 @@ export type EntityProperty<Entity> = {
  */
 export type Factory = <Entity, Settings>(
   entity: ObjectType<Entity>,
-  settings?: Settings
+  settings?: Settings,
 ) => EntityFactory<Entity, Settings>;
 
 /**

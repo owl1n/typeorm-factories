@@ -1,34 +1,34 @@
 # TypeORM Entity Factory
 
-English | [Русский](README.ru.md)
+[English](README.md) | Русский
 
-A library for creating TypeORM entity factories to simplify test data generation in NestJS applications.
+Библиотека для создания фабрик сущностей TypeORM, упрощающая генерацию тестовых данных в NestJS приложениях.
 
-## Why Use This
+## Зачем это нужно
 
-When writing unit tests, you often need to create entity instances with populated data. Instead of manually creating objects in every test, factories allow you to:
+При написании юнит-тестов часто требуется создавать экземпляры сущностей с заполненными данными. Вместо ручного создания объектов в каждом тесте, фабрики позволяют:
 
-- Centrally define test data structure
-- Quickly generate realistic data using Faker
-- Override specific fields when needed
-- Create multiple instances with a single command
-- Avoid code duplication across tests
+- Централизованно определить структуру тестовых данных
+- Быстро генерировать реалистичные данные с помощью Faker
+- Переопределять отдельные поля при необходимости
+- Создавать множественные экземпляры одной командой
+- Избежать дублирования кода в тестах
 
-## Installation
+## Установка
 
 ```bash
 pnpm add -D typeorm-factories @faker-js/faker
-# or
+# или
 npm install --save-dev typeorm-factories @faker-js/faker
 ```
 
-The library uses [@faker-js/faker](https://github.com/faker-js/faker) to generate fake data.
+Библиотека использует [@faker-js/faker](https://github.com/faker-js/faker) для генерации фейковых данных.
 
-## Quick Start
+## Быстрый старт
 
-### 1. Define a Factory
+### 1. Определение фабрики
 
-Create a factory file (e.g., `factories/task.factory.ts`):
+Создайте файл фабрики (например, `factories/task.factory.ts`):
 
 ```typescript
 import { faker } from '@faker-js/faker';
@@ -48,7 +48,7 @@ define(Task, (fakerInstance) => {
 });
 ```
 
-### 2. Use the Factory in Tests
+### 2. Использование фабрики в тестах
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
@@ -85,7 +85,7 @@ describe('TasksService', () => {
   });
 
   describe('create', () => {
-    it('should create a new task', async () => {
+    it('должен создать новую задачу', async () => {
       const taskData = await factory(Task).make();
       
       jest.spyOn(repository, 'save').mockResolvedValue(taskData);
@@ -98,7 +98,7 @@ describe('TasksService', () => {
   });
 
   describe('findCompleted', () => {
-    it('should return only completed tasks', async () => {
+    it('должен вернуть только выполненные задачи', async () => {
       const completedTasks = await factory(Task)
         .makeMany(3, { completed: true });
       
@@ -117,11 +117,11 @@ describe('TasksService', () => {
 
 ### `define(Entity, factoryFunction)`
 
-Registers a factory for an entity.
+Регистрирует фабрику для сущности.
 
-**Parameters:**
-- `Entity`: TypeORM entity class
-- `factoryFunction`: Function that receives a Faker instance and optional settings, returns a populated entity
+**Параметры:**
+- `Entity`: Класс сущности TypeORM
+- `factoryFunction`: Функция, принимающая экземпляр Faker и опциональные настройки, возвращающая заполненную сущность
 
 ```typescript
 define(User, (faker) => {
@@ -134,24 +134,24 @@ define(User, (faker) => {
 
 ### `factory(Entity, settings?)`
 
-Creates an EntityFactory instance for generating entity objects.
+Создает экземпляр EntityFactory для генерации объектов сущности.
 
-**Parameters:**
-- `Entity`: Entity class
-- `settings` (optional): Additional settings for the factory
+**Параметры:**
+- `Entity`: Класс сущности
+- `settings` (опционально): Дополнительные настройки для фабрики
 
-**Returns:** `EntityFactory<Entity, Settings>`
+**Возвращает:** `EntityFactory<Entity, Settings>`
 
 ### EntityFactory API
 
 #### `make(overrideParams?)`
 
-Creates a single entity instance.
+Создает один экземпляр сущности.
 
 ```typescript
 const task = await factory(Task).make();
 
-// With field overrides
+// С переопределением полей
 const urgentTask = await factory(Task).make({ 
   priority: 'high',
   dueDate: new Date('2024-12-31')
@@ -160,19 +160,19 @@ const urgentTask = await factory(Task).make({
 
 #### `makeMany(count, overrideParams?)`
 
-Creates an array of entity instances.
+Создает массив экземпляров сущности.
 
 ```typescript
-// Create 5 tasks
+// Создать 5 задач
 const tasks = await factory(Task).makeMany(5);
 
-// Create 3 tasks with "completed" status
+// Создать 3 задачи со статусом "completed"
 const completedTasks = await factory(Task).makeMany(3, { completed: true });
 ```
 
 #### `map(callback)`
 
-Applies a function to each created object. Useful for additional processing.
+Применяет функцию к каждому созданному объекту. Полезно для дополнительной обработки.
 
 ```typescript
 const tasksWithTimestamps = await factory(Task)
@@ -183,9 +183,9 @@ const tasksWithTimestamps = await factory(Task)
   .makeMany(5);
 ```
 
-## Advanced Usage
+## Продвинутое использование
 
-### Factories with Settings
+### Фабрики с настройками
 
 ```typescript
 interface UserSettings {
@@ -200,29 +200,29 @@ define(User, (faker, settings?: UserSettings) => {
   return user;
 });
 
-// Usage
+// Использование
 const admin = await factory(User, { role: 'admin' }).make();
 const regularUser = await factory(User, { role: 'user' }).make();
 ```
 
-### Nested Entities
+### Вложенные сущности
 
-Factories can automatically resolve nested entities:
+Фабрики могут автоматически разрешать вложенные сущности:
 
 ```typescript
 define(Comment, (faker) => {
   const comment = new Comment();
   comment.text = faker.lorem.paragraph();
-  comment.author = factory(User).make(); // Returns a Promise
+  comment.author = factory(User).make(); // Вернет Promise
   return comment;
 });
 
-// Nested entity will be automatically resolved
+// Вложенная сущность будет автоматически разрешена
 const comment = await factory(Comment).make();
-console.log(comment.author); // User object
+console.log(comment.author); // Объект User
 ```
 
-### Related Entities
+### Связанные сущности
 
 ```typescript
 define(Post, (faker) => {
@@ -238,14 +238,14 @@ define(Comment, (faker) => {
   return comment;
 });
 
-// Creating a post with comments
+// Создание поста с комментариями
 const post = await factory(Post).make();
 const comments = await factory(Comment).makeMany(3, { postId: post.id });
 ```
 
-## Project Structure
+## Структура проекта
 
-It's recommended to keep factories in a separate directory:
+Рекомендуется хранить фабрики в отдельной директории:
 
 ```
 your-project/
@@ -261,24 +261,24 @@ your-project/
     └── ...
 ```
 
-The library automatically finds all files matching the pattern `**/*.factory.{js,ts}` when the module initializes.
+Библиотека автоматически находит все файлы с паттерном `**/*.factory.{js,ts}` при инициализации модуля.
 
-## How It Works
+## Как это работает
 
-1. When `FactoryModule` is imported into a test module, it scans the project for factory files
-2. All found factories are registered in a global registry
-3. The `factory()` function retrieves the registered factory by entity class
-4. `make()` and `makeMany()` methods use Faker to generate data
-5. Nested factories and promises are automatically resolved
+1. При импорте `FactoryModule` в тестовый модуль, он сканирует проект на наличие файлов фабрик
+2. Все найденные фабрики регистрируются в глобальном реестре
+3. Функция `factory()` получает зарегистрированную фабрику по классу сущности
+4. Методы `make()` и `makeMany()` используют Faker для генерации данных
+5. Вложенные фабрики и промисы автоматически разрешаются
 
-## Compatibility
+## Совместимость
 
 - TypeORM: ^0.3.0
 - NestJS: ^11.0.0
 - @faker-js/faker: ^10.0.0
 - Node.js: >=18.0.0
 
-## Complete Setup Example
+## Пример полной настройки
 
 **factories/task.factory.ts:**
 ```typescript
@@ -316,23 +316,23 @@ describe('TasksService', () => {
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [FactoryModule],
-      // ... other providers
+      // ... остальные провайдеры
     }).compile();
     
     await module.init();
   });
 
-  it('example test', async () => {
+  it('пример теста', async () => {
     const task = await factory(Task).make({ priority: 5 });
     expect(task.priority).toBe(5);
   });
 });
 ```
 
-## Support
+## Поддержка
 
-If you have questions or issues, please create an [Issue](https://github.com/owl1n/typeorm-factories/issues/new) in the project repository.
+Если у вас возникли вопросы или проблемы, создайте [Issue](https://github.com/owl1n/typeorm-factories/issues/new) в репозитории проекта.
 
-## License
+## Лицензия
 
 MIT
