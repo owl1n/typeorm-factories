@@ -1,6 +1,6 @@
 {
   "name": "typeorm-factories",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Advanced factories for TypeORM entities with states, sequences, lifecycle hooks, and associations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
