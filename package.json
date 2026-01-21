@@ -2,17 +2,21 @@
   "name": "typeorm-factories",
   "version": "2.0.1",
   "description": "Advanced factories for TypeORM entities with states, sequences, lifecycle hooks, and associations",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "coveralls": "vitest run --coverage --reporter=lcov | coveralls",
     "test:watch": "vitest",
-    "build": "rm -rf ./dist && tsc && pnpm run build:index",
-    "build:index": "rm -rf ./index.js ./index.d.ts && tsc -d --skipLibCheck ./index.ts",
+    "build": "rm -rf ./dist && tsc",
     "format": "prettier **/*.ts --ignore-path ./.prettierignore --write && git status",
     "prepublish": "pnpm run format && pnpm run build"
   },
+
   "keywords": [
     "typeorm",
     "factories",

@@ -19,8 +19,12 @@ coverage/
 # Build output
 dist/
 build/
+
+# Root build artifacts (не должны коммититься)
 /index.js
 /index.d.ts
+vitest.config.js
+vitest.config.d.ts
 
 # Environment
 .env

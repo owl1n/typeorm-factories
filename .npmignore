@@ -1,8 +1,46 @@
-tsconfig.json
-node_modules/
+# Source files
 src/
-/index.ts
+test/
+__tests__/
+examples/
+
+# Config files
+tsconfig.json
+vitest.config.ts
+.editorconfig
+.prettierignore
+
+# Dependencies
+node_modules/
 yarn.lock
 yarn-error.log
 package-lock.json
+pnpm-lock.yaml
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Build artifacts (корневые, только dist публикуем)
+/index.ts
+/index.js
+/index.d.ts
+vitest.config.js
+vitest.config.d.ts
+
+# IDE
 .idea
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Documentation (необязательно, можно оставить)
+article-dev-to.md
+MIGRATION.md
+EXAMPLES.md
